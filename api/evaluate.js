@@ -1,6 +1,4 @@
-const fetch = (...args) => import('node-fetch').then(({default: f}) => f(...args));
-
-module.exports = async function handler(req, res) {
+export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
@@ -21,7 +19,7 @@ module.exports = async function handler(req, res) {
     ? `Task Question:\n"""\n${taskQuestion}\n"""\n\n`
     : '';
 
-  const prompt = `You are a certified IELTS examiner. Evaluate this IELTS Writing Task ${taskType} essay strictly per official IELTS band descriptors. ${taskQuestion ? 'The task question is provided — use it to assess Task Response accuracy.' : 'No task question was provided — evaluate Task Response on general IELTS criteria.'}
+  const prompt = `You are a certified IELTS examiner. Evaluate this IELTS Writing Task ${taskType} essay strictly per official IELTS band descriptors. ${taskQuestion ? 'The task question is provided — use it to assess Task Response accuracy.' : 'No task question provided — evaluate Task Response on general IELTS criteria.'}
 
 ${questionBlock}Essay:
 """
