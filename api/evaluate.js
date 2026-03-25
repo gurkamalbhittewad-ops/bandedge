@@ -1,14 +1,10 @@
-// api/evaluate.js
-// Vercel Serverless Function — proxies essay to Claude API securely
-// Your ANTHROPIC_API_KEY lives only here, never in the browser
+const fetch = (...args) => import('node-fetch').then(({default: f}) => f(...args));
 
-export default async function handler(req, res) {
-  // Only allow POST requests
+module.exports = async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  // CORS — allow your frontend to call this
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
@@ -17,7 +13,6 @@ export default async function handler(req, res) {
 
   const { essay, taskQuestion, taskType } = req.body;
 
-  // Basic validation
   if (!essay || essay.trim().length < 20) {
     return res.status(400).json({ error: 'Essay too short.' });
   }
@@ -26,7 +21,7 @@ export default async function handler(req, res) {
     ? `Task Question:\n"""\n${taskQuestion}\n"""\n\n`
     : '';
 
-  const prompt = `You are a certified IELTS examiner. Evaluate this IELTS Writing Task ${taskType} essay strictly per official IELTS band descriptors. ${taskQuestion ? 'The task question is provided — use it to assess Task Response accuracy (how well the essay addresses the specific question).' : 'No task question was provided — evaluate Task Response on general IELTS criteria.'}
+  const prompt = `You are a certified IELTS examiner. Evaluate this IELTS Writing Task ${taskType} essay strictly per official IELTS band descriptors. ${taskQuestion ? 'The task question is provided — use it to assess Task Response accuracy.' : 'No task question was provided — evaluate Task Response on general IELTS criteria.'}
 
 ${questionBlock}Essay:
 """
@@ -35,17 +30,17 @@ ${essay}
 
 Respond ONLY with a valid JSON object — no markdown, no extra text:
 {
-  "overall_band": <4–9, 0.5 increments>,
-  "task_response": <4–9, 0.5 increments>,
-  "coherence_cohesion": <4–9, 0.5 increments>,
-  "lexical_resource": <4–9, 0.5 increments>,
-  "grammatical_range": <4–9, 0.5 increments>,
+  "overall_band": <4-9, 0.5 increments>,
+  "task_response": <4-9, 0.5 increments>,
+  "coherence_cohesion": <4-9, 0.5 increments>,
+  "lexical_resource": <4-9, 0.5 increments>,
+  "grammatical_range": <4-9, 0.5 increments>,
   "strengths": "<2-3 sentences on what the candidate did well>",
   "weaknesses": "<2-3 sentences on the main weaknesses>",
   "feedback": "<3-4 sentences of detailed examiner-style feedback>",
-  "improvement_1": "<specific, actionable tip>",
-  "improvement_2": "<specific, actionable tip>",
-  "improvement_3": "<specific, actionable tip>"
+  "improvement_1": "<specific actionable tip>",
+  "improvement_2": "<specific actionable tip>",
+  "improvement_3": "<specific actionable tip>"
 }`;
 
   try {
